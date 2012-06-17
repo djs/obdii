@@ -27,6 +27,8 @@ class Elm(object):
 
             self.interface = interface
 
+        self._connect()
+
     def reset(self):
         response = self.send_control_command('Z')
         self._check_reset(response)
@@ -46,7 +48,9 @@ class Elm(object):
 
         response = self.send_control_command('SP0')
         response = self.send_control_command('DP')
-        print response
+        self.send('0100')
+        # TODO deal with multiple ECUs properly
+        self.send_control_command('CRA7E8')
 
     def send(self, command):
         data = ""
