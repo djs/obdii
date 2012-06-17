@@ -80,6 +80,12 @@ class ElmTests(unittest.TestCase):
     def test_get_device_info(self):
         self.elm.get_device_info()
 
+    def test_send_obdii_command(self):
+        expected_response = [0x41, 0x0c, 0x1a, 0xf8]
+
+        data = self.elm.send_obdii_command('010C')
+        assert data == expected_response
+
 
 
 

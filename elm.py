@@ -64,6 +64,20 @@ class Elm(object):
     def send_control_command(self, command):
         return self.send(self.AT_PREFIX + command)
 
+    def send_obdii_command(self, command):
+        text = self.send(command).strip()
+
+        if text.find('\n') != -1:
+            raise NotImplementedError, "multiline response not yet supported"
+
+        data = []
+
+        for byte in text.split(' '):
+            data.append(int(byte, 16))
+
+        return data
+
+
     def get_device_info(self):
         print 'Device Description: ' + self.send_control_command('@1')
         print 'Device Identifier: ' + self.send_control_command('@2')
