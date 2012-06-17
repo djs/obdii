@@ -27,13 +27,24 @@ class Elm(object):
 
             self.interface = interface
 
-    def _connect(self):
+    def reset(self):
         response = self.send_control_command('Z')
+        self._check_reset(response)
+
+    def warm_reset(self):
+        response = self.send_control_command('WS')
+        self._check_reset(response)
+
+    def _check_reset(self, response):
         if response != "ELM327 v1.3a":
             print 'received: ' + response
             raise Exception
 
-        response = self.send_control_command('SP 0')
+
+    def _connect(self):
+        self.reset()
+
+        response = self.send_control_command('SP0')
         response = self.send_control_command('DP')
         print response
 
