@@ -1,26 +1,22 @@
-import unittest
-from flexmock import flexmock
-import re
 import elm
+import json
+import os
+import re
+
+import unittest
 import pytest
 
 class MockElm327(object):
     COMMAND_RECEIVED = re.compile('^(.*?)\r', re.M)
 
-    command_table = { 'ATZ' : '\r\rELM327 v1.3a',
-                      'ATWS' : '\r\rELM327 v1.3a',
-                      'ATRV' : '12.3V',
-                      'ATDP' : 'AUTO',
-                      'ATSP0': 'OK',
-                      'AT@1' : 'SCANTOOL.NET LLC',
-                      'AT@2' : '100010006357',
-                      ''     : ''
-                      }
-
     def __init__(self):
         self.in_data = ""
         self.out_data = ""
         self.echo = True
+
+        fh = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'elm.json'), 'r')
+        self.command_table = json.load(fh)
+        fh.close()
 
     def write(self, data):
         self.in_data = self.in_data + data
