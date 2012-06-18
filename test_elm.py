@@ -83,7 +83,7 @@ class ElmTests(unittest.TestCase):
     def test_send_obdii_command(self):
         expected_response = [0x41, 0x0c, 0x1a, 0xf8]
 
-        data = self.elm.send_obdii_command('010C')
+        data = self.elm.send_obdii_command([0x01, 0x0c])
         assert data == expected_response
 
 

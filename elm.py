@@ -69,7 +69,8 @@ class Elm(object):
         return self.send(self.AT_PREFIX + command)
 
     def send_obdii_command(self, command):
-        text = self.send(command).strip()
+        cmd = ['%.2X' % x for x in command]
+        text = self.send(''.join(cmd)).strip()
 
         if text.find('\n') != -1:
             raise NotImplementedError, "multiline response not yet supported"
