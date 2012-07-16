@@ -9,10 +9,15 @@ import pytest
 class MockElm327(object):
     COMMAND_RECEIVED = re.compile('^(.*?)\r', re.M)
 
+    class State(object):
+        RESET = 0
+        NORMAL = 1
+
     def __init__(self):
         self.in_data = ""
         self.out_data = ""
         self.echo = True
+        self.state = self.State.RESET
 
         fh = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'elm.json'), 'r')
         self.command_table = json.load(fh)
@@ -24,14 +29,14 @@ class MockElm327(object):
         while True:
             m = self.COMMAND_RECEIVED.search(self.in_data)
             if m:
-                command = m.group(1).replace(' ', '')
+                command = m.group(1).replace(' ', '').upper()
                 self.in_data = self.COMMAND_RECEIVED.sub('', self.in_data)
 
                 try:
                     if self.echo:
                         self.out_data = self.out_data + command + '\r'
 
-                    self.out_data = self.out_data + self.command_table[m.group(1)] + '\r\r>'
+                    self.out_data = self.out_data + self.command_table[command] + '\r\r>'
                 except KeyError:
                     pass
             else:
