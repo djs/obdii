@@ -91,4 +91,30 @@ class Elm(object):
         response = self.send_control_command('RV')
         return response
 
+class ElmFull(Elm):
+    def _connect(self):
+        self.reset()
+
+        response = self.send_control_command('SP0')
+        response = self.send_control_command('DP')
+        self.send('0100')
+
+        self.send_control_command('H1')
+
+    def send_obdii_command(self, command):
+        cmd = ['%.2X' % x for x in command]
+        text = self.send(''.join(cmd))
+
+
+        response = {}
+
+        for line in text.split('\r'):
+            segments = line.strip().split(' ')
+            ecu = int(segments[0], 16)
+            data = [int(x, 16) for x in segments[1:]]
+
+            response[ecu] = response[ecu].append(data)
+
+
+        return data
 

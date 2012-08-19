@@ -20,8 +20,28 @@ class MockElm327(object):
         self.state = self.State.RESET
 
         fh = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'elm.json'), 'r')
-        self.command_table = json.load(fh)
+        self.command_table_h0 = json.load(fh)
         fh.close()
+
+        fh = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'elm_h1.json'), 'r')
+        self.command_table_h1 = json.load(fh)
+        fh.close()
+
+        self._set_h0()
+
+    def _set_h1(self):
+        self.headers = True
+        self.command_table = self.command_table_h1
+
+    def _set_h0(self):
+        self.headers = False
+        self.command_table = self.command_table_h0
+
+    def open(self):
+        pass
+
+    def inWaiting(self):
+        return 0
 
     def write(self, data):
         self.in_data = self.in_data + data
@@ -30,15 +50,23 @@ class MockElm327(object):
             m = self.COMMAND_RECEIVED.search(self.in_data)
             if m:
                 command = m.group(1).replace(' ', '').upper()
+                print "old in_data = " + repr(self.in_data)
                 self.in_data = self.COMMAND_RECEIVED.sub('', self.in_data)
+                print "new in_data = " + repr(self.in_data)
 
-                try:
+                if command == 'ATH0':
+                    self._set_h0()
+                elif command == 'ATH1':
+                    self._set_h1()
+
+                if command in self.command_table:
                     if self.echo:
                         self.out_data = self.out_data + command + '\r'
 
                     self.out_data = self.out_data + self.command_table[command] + '\r\r>'
-                except KeyError:
-                    pass
+                else:
+                    print "wtf @ " + command
+                    self.out_data = self.out_data + '?' + '\r\r>'
             else:
                 break
 
