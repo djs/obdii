@@ -109,12 +109,28 @@ class ElmFull(Elm):
         response = {}
 
         for line in text.split('\r'):
+            if line == '':
+                continue
             segments = line.strip().split(' ')
             ecu = int(segments[0], 16)
             data = [int(x, 16) for x in segments[1:]]
 
-            response[ecu] = response[ecu].append(data)
+            # todo: respect sequence numbers for ooo data
+            pci = data[0]
+            if pci & 0xF0 == 0x00:
+                # single frame
+                response[ecu] = data[1:]
+            elif pci & 0xF0 == 0x10:
+                # first frame
+                response[ecu] = data[2:]
+            elif pci & 0xF0 == 0x20:
+                # consecutive frame
+                if ecu in response:
+                    response[ecu].extend(data[1:])
+                else:
+                    raise Exception
+            else:
+                raise Exception
 
-
-        return data
+        return response
 
