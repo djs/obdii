@@ -40,6 +40,22 @@ class Obdii(object):
 
         return ((data[0] << 8) + (data[1])) / 4
 
+    def get_vehicle_speed(self):
+        data = self._get_response([0x01, 0x0D])
+
+        if len(data) != 1:
+            raise UnexpectedDataValue
+
+        return data[0]
+
+    def get_throttle_position(self):
+        data = self._get_response([0x01, 0x11])
+
+        if len(data) != 1:
+            raise UnexpectedDataValue
+
+        return (data[0] * 100.0) / 255
+
     def _parse_response_data(self, command, response):
         #command = command.strip()
         #cmd = [int(command[i:i + 2], 16) for i in range(0, len(command), 2)]
