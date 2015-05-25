@@ -1,6 +1,10 @@
 import serial
 import re
 import time
+import serialenum
+
+def available_ports():
+    return serialenum.enumerate()
 
 class Elm(object):
     PROMPT = ">"
@@ -133,4 +137,3 @@ class ElmFull(Elm):
                 raise Exception
 
         return response
-

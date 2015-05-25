@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <title>Bootstrap 101 Template</title>
+
+    <!-- Bootstrap -->
+    <link href="static/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="container">
+        <div class="page-header">
+            <h1>obdii live view</h1>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#myModal">
+            Choose Data Source
+        </button>
+
+        <!-- Modal -->
+        <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="myModalLabel">Modal title</h4>
+              </div>
+              <div class="modal-body">
+                  <select class="form-control" id="portselect">
+                  </select>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary">Save changes</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6">
+                <h2>RPM: <span id="currentrpm"></span></h2>
+                <canvas id="enginerpm" width="800" height="100"></canvas>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h2>Throttle: <span id="currentthrottle"></span></h2>
+                <canvas id="enginethrottle" width="800" height="100"></canvas>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h2>Speed: <span id="currentspeed"></span> km/h</h2>
+                <canvas id="vehiclespeed" width="800" height="100"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="static/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="static/js/smoothie.js"></script>
+    <script type="text/javascript">
+    (function() {
+
+        $.getJSON("api/ports", function(data) {
+            var options = $("#portselect");
+            $.each(data.ports, function() {
+                options.append($("<option />").val(this).text(this));
+            });
+        });
+
+        var smoothie1 = new SmoothieChart({interpolation:'linear', maxValue:8000, minValue:0});
+        var smoothie2 = new SmoothieChart({interpolation:'linear', maxValue:100, minValue:0});
+        var smoothie3 = new SmoothieChart({interpolation:'linear', maxValue:120, minValue:0});
+        smoothie1.streamTo(document.getElementById("enginerpm"), 1000);
+        smoothie2.streamTo(document.getElementById("enginethrottle"), 1000);
+        smoothie3.streamTo(document.getElementById("vehiclespeed"), 1000);
+
+        // Data
+        var line1 = new TimeSeries();
+        var line2 = new TimeSeries();
+        var line3 = new TimeSeries();
+
+        setInterval(function() {
+            $.getJSON("api/engine", function(data) {
+                line1.append(new Date().getTime(), data.rpm);
+                line2.append(new Date().getTime(), data.throttle);
+                $("#currentrpm").text(data.rpm);
+                $("#currentthrottle").text(data.throttle);
+            });
+        }, 500);
+
+        setInterval(function() {
+            $.getJSON("api/vehicle", function(data) {
+                line3.append(new Date().getTime(), data.speed);
+                $("#currentspeed").text(data.speed);
+            })
+        }, 500);
+
+        // Add to SmoothieChart
+        smoothie1.addTimeSeries(line1, {lineWidth:2,strokeStyle:'#ff0000',fillStyle:'rgba(255,0,255,0.30)'});
+        smoothie2.addTimeSeries(line2, {lineWidth:2,strokeStyle:'#ff0000',fillStyle:'rgba(255,0,255,0.30)'});
+        smoothie3.addTimeSeries(line3, {lineWidth:2,strokeStyle:'#ff0000',fillStyle:'rgba(255,0,255,0.30)'});
+    })();
+    </script>
+  </body>
+</html>
