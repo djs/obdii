@@ -21,13 +21,11 @@ class MockElm327(object):
         self.spaces = True
         self.state = self.State.RESET
 
-        fh = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'elm.json'), 'r')
-        self.command_table_h0 = json.load(fh)
-        fh.close()
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'elm.json'), 'r') as fh:
+            self.command_table_h0 = json.load(fh)
 
-        fh = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'elm_h1.json'), 'r')
-        self.command_table_h1 = json.load(fh)
-        fh.close()
+        with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fixtures', 'elm_h1.json'), 'r') as fh:
+            self.command_table_h1 = json.load(fh)
 
         self._set_h0()
 
@@ -156,4 +154,3 @@ class ElmFullTests(unittest.TestCase):
         data = self.elm.send_obdii_command([0x09, 0x02])
         assert data == expected_response
         print ''.join(chr(i) for i in data[0x7e8][3:])
-
