@@ -56,6 +56,22 @@ class Obdii(object):
 
         return (data[0] * 100.0) / 255
 
+    def get_fuel_level_input(self):
+        data = self._get_response([0x01, 0x2F])
+
+        if len(data) != 1:
+            raise UnexpectedDataValue
+
+        return data[0]
+
+    def get_maf_airflow_rate(self):
+        data = self._get_response([0x01, 0x10])
+
+        if len(data) != 2:
+            raise UnexpectedDataValue
+
+        return ((data[0] << 8) + (data[1]))
+
     def _parse_response_data(self, command, response):
         #command = command.strip()
         #cmd = [int(command[i:i + 2], 16) for i in range(0, len(command), 2)]
