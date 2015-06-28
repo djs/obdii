@@ -64,6 +64,14 @@ class Obdii(object):
 
         return data[0]
 
+    def get_barometric_pressure(self):
+        data = self._get_response([0x01, 0x33])
+
+        if len(data) != 1:
+            raise UnexpectedDataValue
+
+        return data[0]
+
     def get_maf_airflow_rate(self):
         data = self._get_response([0x01, 0x10])
 
