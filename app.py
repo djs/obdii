@@ -12,7 +12,7 @@ random.seed()
 
 app = Flask(__name__)
 
-class ObdiiSim(obdii.Obdii):
+class ObdiiSim(obdii.Obdii):2
     def get_current_engine_rpm(self):
         return random.randint(600, 4000)
     def get_throttle_position(self):
