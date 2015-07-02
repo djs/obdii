@@ -1,4 +1,3 @@
-
 import elm
 import test_elm
 import obdii
@@ -12,18 +11,10 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-Base = declarative_base()
+import schema
+import sys
 
-class Record(Base):
-    __tablename__ = 'records'
-    id = Column(Integer, primary_key=True)
-    rpm = Column(Integer)
-    throttle = Column(Integer)
-    speed = Column(Integer)
-    ect = Column(Integer)
-    maf = Column(Integer)
-    fuel = Column(Integer)
-    timestamp = Column(DateTime)
+Base = declarative_base()
 
 
 def poll(interface):
@@ -34,25 +25,38 @@ def poll(interface):
     speed = interface.get_vehicle_speed()
     maf = interface.get_maf_airflow_rate()
     fuel = interface.get_fuel_level_input()
-    record = Record(rpm=rpm,
-                    speed=speed,
-                    throttle=throttle,
-                    ect=ect,
-                    maf=maf,
-                    fuel=fuel,
-                    timestamp=datetime.now())
+    pressure = interface.get_barometric_pressure()
+    #fuel_rate = interface.get_engine_fuel_rate()
+    fuel_rate = 0
+    intake_temp = interface.get_intake_air_temperature()
+    #fuel_pressure = interface.get_fuel_pressure()
+    fuel_pressure = 0
+    record = schema.Record(rpm=rpm,
+                           speed=speed,
+                           throttle=throttle,
+                           ect=ect,
+                           maf=maf,
+                           fuel=fuel,
+                           pressure=pressure,
+                           fuel_rate=fuel_rate,
+                           intake_temp=intake_temp,
+                           fuel_pressure=fuel_pressure,
+                           timestamp=datetime.now())
 
     return record
 
+
 def main():
-    engine = create_engine('sqlite:///history.sqlite')
+    engine = create_engine('sqlite:///live.sqlite')
     Session = sessionmaker()
     Session.configure(bind=engine)
-    Base.metadata.create_all(engine)
+    schema.Base.metadata.create_all(engine)
     s = Session()
 
-    #elm_interface = elm.Elm(test_elm.MockElm327())
-    elm_interface = elm.Elm('COM3')
+    if sys.argv[1] == 'mock':
+        elm_interface = elm.Elm(test_elm.MockElm327())
+    else:
+        elm_interface = elm.Elm(sys.argv[1])
     interface = obdii.Obdii(elm_interface)
 
     while 1:
@@ -60,8 +64,6 @@ def main():
         s.add(record)
         s.commit()
         #time.sleep(1)
-
-
 
 
 if __name__ == "__main__":

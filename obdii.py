@@ -1,3 +1,7 @@
+import random
+import elm
+
+random.seed()
 
 class UnexpectedResponse(ValueError):
     pass
@@ -39,6 +43,7 @@ class Obdii(object):
             raise UnexpectedDataValue
 
         return ((data[0] << 8) + (data[1])) / 4
+        #return random.randint(300,6000)
 
     def get_vehicle_speed(self):
         data = self._get_response([0x01, 0x0D])
@@ -79,6 +84,31 @@ class Obdii(object):
             raise UnexpectedDataValue
 
         return ((data[0] << 8) + (data[1]))
+
+    def get_engine_fuel_rate(self):
+        #((A*256)+B)*0.05
+        data = self._get_response([0x01, 0x5E])
+
+        if len(data) != 2:
+            raise UnexpectedDataValue
+
+        return (data[0]*256 + data[1])*0.05
+
+    def get_intake_air_temperature(self):
+        data = self._get_response([0x01, 0x0F])
+
+        if len(data) != 1:
+            raise UnexpectedDataValue
+
+        return data[0] - 40
+
+    def get_fuel_pressure(self):
+        data = self._get_response([0x01, 0x0A])
+
+        if len(data) != 1:
+            raise UnexpectedDataValue
+
+        return data[0]*3
 
     def _parse_response_data(self, command, response):
         #command = command.strip()
@@ -126,5 +156,3 @@ class Obdii(object):
                 supported.append(pid)
 
         return supported
-
-

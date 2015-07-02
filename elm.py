@@ -3,6 +3,27 @@ import re
 import time
 import serialenum
 
+
+class ElmProtocolError(Exception):
+    pass
+
+
+class BadCommandError(ElmProtocolError):
+    def __init__(self, command):
+        self.command = command
+
+    def __str__(self):
+        return repr(self.command)
+
+
+class NoDataError(ElmProtocolError):
+    pass
+
+
+class UnknownError(ElmProtocolError):
+    pass
+
+
 def available_ports():
     return serialenum.enumerate()
 
@@ -63,10 +84,17 @@ class Elm(object):
 
         while not self.PROMPT_REGEX.search(data):
             data = data + self.interface.read(1)
-            #print data
 
-        print 'data read: ' + data.replace('\r', '\n')
-        return self.RESPONSE_REGEX.search(data).group(1)
+        #print 'data read: ' + data.replace('\r', '\n')
+        try:
+            return self.RESPONSE_REGEX.search(data).group(1)
+        except AttributeError:
+            if data[0] == '?':
+                raise BadCommandError(command)
+            elif data.startswith('NO DATA'):
+                raise NoDataError
+            else:
+                raise UnknownError
 
 
     def send_control_command(self, command):
