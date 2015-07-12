@@ -13,9 +13,27 @@ from sqlalchemy.orm import sessionmaker
 
 import schema
 import sys
+import threading
 
 Base = declarative_base()
 
+import gps
+
+gpsd = None #seting the global variable
+gpsp = None
+
+class GpsPoller(threading.Thread):
+  def __init__(self):
+    threading.Thread.__init__(self)
+    global gpsd #bring it in scope
+    gpsd = gps.gps(mode=gps.WATCH_ENABLE) #starting the stream of info
+    self.current_value = None
+    self.running = True #setting the thread running to true
+
+  def run(self):
+    global gpsd
+    while gpsp.running:
+      gpsd.next() #this will continue to loop and grab EACH set of gpsd info to clear the buffer
 
 def poll(interface):
     rpm = interface.get_current_engine_rpm()
@@ -35,6 +53,11 @@ def poll(interface):
     abs_throttle_b = interface.get_abs_throttle_b()
     acc_pedal_d = interface.get_acc_pedal_d()
     acc_pedal_e = interface.get_acc_pedal_e()
+
+    #gpsdata = gpssession.next()
+    #print gpsd.utc
+    #print gpsd.fix.latitude
+    #print gpsd.fix.longitude
     record = schema.Record(rpm=rpm,
                            speed=speed,
                            throttle=throttle,
@@ -49,6 +72,13 @@ def poll(interface):
                            abs_throttle_b=abs_throttle_b,
                            acc_pedal_d=acc_pedal_d,
                            acc_pedal_e=acc_pedal_e,
+                           gps_altitude=gpsd.fix.altitude,
+                           gps_lat=gpsd.fix.latitude,
+                           gps_long=gpsd.fix.longitude,
+                           gps_speed=gpsd.fix.speed,
+                           gps_climb=gpsd.fix.climb,
+                           gps_track=gpsd.fix.track,
+                           gps_mode=gpsd.fix.mode,
                            timestamp=datetime.now())
 
     return record
@@ -67,11 +97,21 @@ def main():
         elm_interface = elm.Elm(sys.argv[1])
     interface = obdii.Obdii(elm_interface)
 
-    while 1:
-        record = poll(interface)
-        s.add(record)
-        s.commit()
-        #time.sleep(1)
+    #gpssession = gps.gps()
+    #gpssession.stream(gps.WATCH_ENABLE|gps.WATCH_NEWSTYLE)
+    global gpsp
+    gpsp = GpsPoller() # create the thread
+    gpsp.start()
+
+    try:
+        while 1:
+            record = poll(interface)
+            s.add(record)
+            s.commit()
+            #time.sleep(1)
+    except (KeyboardInterrupt, SystemExit):
+            gpsp.running = False
+            gpsp.join() # wait for the thread to finish what it's doing
 
 
 if __name__ == "__main__":
