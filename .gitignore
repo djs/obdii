@@ -1,4 +1,9 @@
 *.pyc
 .coverage
 htmlcov/
-
+bower_components/
+.ipynb_checkpoints/
+*.ipynb
+.idea/
+node_modules/
+live-*.sqlite
