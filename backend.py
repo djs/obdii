@@ -31,6 +31,10 @@ def poll(interface):
     intake_temp = interface.get_intake_air_temperature()
     #fuel_pressure = interface.get_fuel_pressure()
     fuel_pressure = 0
+    rel_throttle = interface.get_rel_throttle()
+    abs_throttle_b = interface.get_abs_throttle_b()
+    acc_pedal_d = interface.get_acc_pedal_d()
+    acc_pedal_e = interface.get_acc_pedal_e()
     record = schema.Record(rpm=rpm,
                            speed=speed,
                            throttle=throttle,
@@ -41,6 +45,10 @@ def poll(interface):
                            fuel_rate=fuel_rate,
                            intake_temp=intake_temp,
                            fuel_pressure=fuel_pressure,
+                           rel_throttle=rel_throttle,
+                           abs_throttle_b=abs_throttle_b,
+                           acc_pedal_d=acc_pedal_d,
+                           acc_pedal_e=acc_pedal_e,
                            timestamp=datetime.now())
 
     return record

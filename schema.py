@@ -27,4 +27,8 @@ class Record(Base):
     fuel_pressure = Column(Integer)
     intake_temp = Column(Integer)
     pressure = Column(Integer)
+    rel_throttle = Column(Integer)
+    abs_throttle_b = Column(Integer)
+    acc_pedal_d = Column(Integer)
+    acc_pedal_e = Column(Integer)
     timestamp = Column(DateTime)

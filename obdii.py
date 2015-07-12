@@ -77,6 +77,38 @@ class Obdii(object):
 
         return data[0]
 
+    def get_rel_throttle(self):
+        data = self._get_response([0x01, 0x45])
+
+        if len(data) != 1:
+            raise UnexpectedDataValue
+
+        return (data[0]*100.0)/255
+
+    def get_abs_throttle_b(self):
+        data = self._get_response([0x01, 0x47])
+
+        if len(data) != 1:
+            raise UnexpectedDataValue
+
+        return (data[0]*100.0)/255
+
+    def get_acc_pedal_d(self):
+        data = self._get_response([0x01, 0x49])
+
+        if len(data) != 1:
+            raise UnexpectedDataValue
+
+        return (data[0]*100.0)/255
+
+    def get_acc_pedal_e(self):
+        data = self._get_response([0x01, 0x4A])
+
+        if len(data) != 1:
+            raise UnexpectedDataValue
+
+        return (data[0]*100.0)/255
+
     def get_maf_airflow_rate(self):
         data = self._get_response([0x01, 0x10])
 
