@@ -1,4 +1,5 @@
 import obdii
+import elm
 
 import json
 import os
@@ -47,8 +48,9 @@ class ObdiiTests(unittest.TestCase):
 
         self.obd._read_supported_pids()
 
-
-
-
-
-
+    def test_no_data_response(self):
+        (self.mock.should_receive('send_obdii_command')
+                   .with_args([0x01, 0x05])
+                   .and_raise(elm.NoDataError))
+        with pytest.raises(obdii.NoResponse):
+            self.obd.get_current_ect()

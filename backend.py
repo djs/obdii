@@ -36,50 +36,53 @@ class GpsPoller(threading.Thread):
       gpsd.next() #this will continue to loop and grab EACH set of gpsd info to clear the buffer
 
 def poll(interface):
-    rpm = interface.get_current_engine_rpm()
-    speed = interface.get_vehicle_speed()
-    throttle = interface.get_throttle_position()
-    ect = interface.get_current_ect()
-    speed = interface.get_vehicle_speed()
-    maf = interface.get_maf_airflow_rate()
-    fuel = interface.get_fuel_level_input()
-    pressure = interface.get_barometric_pressure()
-    #fuel_rate = interface.get_engine_fuel_rate()
-    fuel_rate = 0
-    intake_temp = interface.get_intake_air_temperature()
-    #fuel_pressure = interface.get_fuel_pressure()
-    fuel_pressure = 0
-    rel_throttle = interface.get_rel_throttle()
-    abs_throttle_b = interface.get_abs_throttle_b()
-    acc_pedal_d = interface.get_acc_pedal_d()
-    acc_pedal_e = interface.get_acc_pedal_e()
-
-    #gpsdata = gpssession.next()
-    #print gpsd.utc
-    #print gpsd.fix.latitude
-    #print gpsd.fix.longitude
-    record = schema.Record(rpm=rpm,
-                           speed=speed,
-                           throttle=throttle,
-                           ect=ect,
-                           maf=maf,
-                           fuel=fuel,
-                           pressure=pressure,
-                           fuel_rate=fuel_rate,
-                           intake_temp=intake_temp,
-                           fuel_pressure=fuel_pressure,
-                           rel_throttle=rel_throttle,
-                           abs_throttle_b=abs_throttle_b,
-                           acc_pedal_d=acc_pedal_d,
-                           acc_pedal_e=acc_pedal_e,
-                           gps_altitude=gpsd.fix.altitude,
-                           gps_lat=gpsd.fix.latitude,
-                           gps_long=gpsd.fix.longitude,
-                           gps_speed=gpsd.fix.speed,
-                           gps_climb=gpsd.fix.climb,
-                           gps_track=gpsd.fix.track,
-                           gps_mode=gpsd.fix.mode,
-                           timestamp=datetime.now())
+    try:
+        rpm = interface.get_current_engine_rpm()
+        speed = interface.get_vehicle_speed()
+        throttle = interface.get_throttle_position()
+        ect = interface.get_current_ect()
+        speed = interface.get_vehicle_speed()
+        maf = interface.get_maf_airflow_rate()
+        fuel = interface.get_fuel_level_input()
+        pressure = interface.get_barometric_pressure()
+        #fuel_rate = interface.get_engine_fuel_rate()
+        fuel_rate = 0
+        intake_temp = interface.get_intake_air_temperature()
+        #fuel_pressure = interface.get_fuel_pressure()
+        fuel_pressure = 0
+        rel_throttle = interface.get_rel_throttle()
+        abs_throttle_b = interface.get_abs_throttle_b()
+        acc_pedal_d = interface.get_acc_pedal_d()
+        acc_pedal_e = interface.get_acc_pedal_e()
+    except obdii.UnexpectedResponse:
+        pass
+    else:
+        #gpsdata = gpssession.next()
+        #print gpsd.utc
+        #print gpsd.fix.latitude
+        #print gpsd.fix.longitude
+        record = schema.Record(rpm=rpm,
+                               speed=speed,
+                               throttle=throttle,
+                               ect=ect,
+                               maf=maf,
+                               fuel=fuel,
+                               pressure=pressure,
+                               fuel_rate=fuel_rate,
+                               intake_temp=intake_temp,
+                               fuel_pressure=fuel_pressure,
+                               rel_throttle=rel_throttle,
+                               abs_throttle_b=abs_throttle_b,
+                               acc_pedal_d=acc_pedal_d,
+                               acc_pedal_e=acc_pedal_e,
+                               gps_altitude=gpsd.fix.altitude,
+                               gps_lat=gpsd.fix.latitude,
+                               gps_long=gpsd.fix.longitude,
+                               gps_speed=gpsd.fix.speed,
+                               gps_climb=gpsd.fix.climb,
+                               gps_track=gpsd.fix.track,
+                               gps_mode=gpsd.fix.mode,
+                               timestamp=datetime.now())
 
     return record
 

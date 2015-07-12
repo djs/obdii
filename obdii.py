@@ -15,6 +15,9 @@ class UnexpectedPIDResponse(UnexpectedResponse):
 class UnexpectedDataValue(UnexpectedResponse):
     pass
 
+class NoResponse(UnexpectedResponse):
+    pass
+
 class Obdii(object):
     supported_pids = { 0x01 : {},
                        0x05 : {}
@@ -23,7 +26,11 @@ class Obdii(object):
         self.adapter = adapter
 
     def _get_response(self, command):
-        response = self.adapter.send_obdii_command(command)
+        try:
+            response = self.adapter.send_obdii_command(command)
+        except elm.NoDataError:
+            raise NoResponse
+
         data = self._parse_response_data(command, response)
 
         return data
